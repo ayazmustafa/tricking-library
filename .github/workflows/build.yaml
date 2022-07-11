@@ -1,0 +1,19 @@
+﻿name: Build My Application
+on: push
+jobs:
+  check-bats-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Code
+        uses: actions/checkout@v3
+      - name: Print Current Directory
+        run: pwd
+      - name: List Files in Directory
+        run: ls
+      - name: Check dotnet CLI
+        run: dotnet build
+      - name: Check dotnet CLI-2
+        run: ls TrickingLibrary.Api -R
+      - name: Check NPM CLI
+        run: npm -v
+        
