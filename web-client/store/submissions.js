@@ -1,21 +1,26 @@
-﻿const initState = () => ({
-  submissions: []
-})
+﻿import {UPLOAD_TYPE} from '@/data/enum';
 
-export const state = initState
+const initState = () => ({
+  submissions: []
+});
+
+export const state = initState;
 
 export const mutations = {
   setSubmissions(state, {submissions}) {
-    state.submissions = submissions
+    state.submissions = submissions;
   },
-  reset(state){
-    Object.assign(state, initState())
+  reset(state) {
+    Object.assign(state, initState());
   }
-}
+};
 
 export const actions = {
-  async fetchSubmissions({commit}){
-    const submissions = await this.$axios.$get("/api/submissions");
-    commit("setSubmissions", {submissions})
+  async fetchSubmissionsForTrick({commit}, {trickId}) {
+    const submissions = await this.$axios.$get(`api/tricks/${trickId}/submissions`);
+    commit('setSubmissions', {submissions});
   },
-}
+  createSubmission({state, commit, dispatch}, {form}) {
+    return this.$axios.$post('/api/submissions', form);
+  }
+};
