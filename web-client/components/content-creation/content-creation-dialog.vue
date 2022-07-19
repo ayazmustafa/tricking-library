@@ -1,5 +1,5 @@
 ﻿<template>
-  <v-dialog :value="active" persistent>
+  <v-dialog :value="active" persistent width="700">
     <template v-slot:activator="{on}">
       <v-menu offset-y>
         <template v-slot:activator="{ on, attrs }">
@@ -22,7 +22,7 @@
     </div>
 
     <div class="d-flex justify-center my-4">
-      <v-btn @click="reset">
+      <v-btn @click="cancelUpload">
         Close
       </v-btn>
     </div>
@@ -30,24 +30,33 @@
 </template>
 
 <script>
-import {mapState, mapMutations} from 'vuex';
-import TrickSteps from "./trick-steps";
-import SubmissionSteps from "./submission-steps";
+import {mapState, mapMutations, mapActions} from 'vuex';
+import TrickSteps from './trick-steps';
+import SubmissionSteps from './submission-steps';
+import DifficultyForm from './difficulty-form';
+import CategoryForm from './category-form';
+
 export default {
-  name: "content-creation-dialog",
-  components: {SubmissionSteps, TrickSteps},
+  name: 'content-creation-dialog',
+  components: {CategoryForm, DifficultyForm, SubmissionSteps, TrickSteps},
   computed: {
     ...mapState('video-upload', ['active', 'component']),
     menuItems() {
       return [
-        {component: TrickSteps, title: "Trick"},
-        {component: SubmissionSteps, title: "Submission"},
-      ]
+        {component: TrickSteps, title: 'Trick'},
+        {component: SubmissionSteps, title: 'Submission'},
+        {component: DifficultyForm, title: 'Difficulty'},
+        {component: CategoryForm, title: 'Category'},
+      ];
     }
   },
-  methods: mapMutations('video-upload', ['reset', 'activate']),
-}
+  methods: {
+    ...mapMutations('video-upload', ['activate']),
+    ...mapActions('video-upload', ['cancelUpload'])
+  },
+};
 </script>
 
 <style scoped>
+
 </style>

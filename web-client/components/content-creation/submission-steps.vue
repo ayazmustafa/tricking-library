@@ -49,45 +49,41 @@
 
 <script>
 import {mapState, mapGetters, mapActions, mapMutations} from 'vuex';
+
 const initState = () => ({
   step: 1,
   form: {
-    trickId: "",
-    video: "",
-    description: ""
+    trickId: '',
+    video: '',
+    description: ''
   }
-})
+});
+
 export default {
-  name: "submission-steps",
+  name: 'submission-steps',
   data: initState,
   computed: {
     ...mapGetters('tricks', ['trickItems']),
-    ...mapState('video-upload', ['active']),
-  },
-  watch: {
-    'active': function(newValue) {
-      if(!newValue){
-        Object.assign(this.$data, initState())
-      }
-    }
   },
   methods: {
     ...mapMutations('video-upload', ['hide']),
     ...mapActions('video-upload', ['startVideoUpload', 'createSubmission']),
     async handleFile(file) {
       if (!file) return;
+
       const form = new FormData();
-      form.append("video", file)
+      form.append('video', file);
       this.startVideoUpload({form});
       this.step++;
     },
     save() {
-      this.createSubmission({form: this.form})
+      this.createSubmission({form: this.form});
       this.hide();
     }
   }
-}
+};
 </script>
 
 <style scoped>
+
 </style>

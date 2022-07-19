@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Channels;
+using Microsoft.AspNetCore.Mvc;
+using TrickingLibrary.Api.BackgroundServices.VideoEditing;
 using TrickingLibrary.Data;
 using TrickingLibrary.Models;
 
 namespace TrickingLibrary.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/submissions")]
 public class SubmissionsController : ControllerBase
 {
     private readonly AppDbContext _ctx;
@@ -16,17 +18,34 @@ public class SubmissionsController : ControllerBase
     }
 
     [HttpGet]
-    public IEnumerable<Submission> All() => _ctx.Submissions.ToList();
+    public IEnumerable<Submission> All() =>
+        _ctx.Submissions
+            .Where(x => x.VideoProcessed)
+            .ToList();
 
     [HttpGet("{id}")]
     public Submission Get(int id) => _ctx.Submissions.FirstOrDefault(x => x.Id.Equals(id));
 
     [HttpPost]
-    public async Task<Submission> Create([FromBody] Submission submission)
+    public async Task<IActionResult> Create(
+        [FromBody] Submission submission,
+        [FromServices] Channel<EditVideoMessage> channel,
+        [FromServices] VideoManager videoManager)
     {
+        if (!videoManager.TemporaryVideoExists(submission.Video))
+        {
+            return BadRequest();
+        }
+
+        submission.VideoProcessed = false;
         _ctx.Add(submission);
         await _ctx.SaveChangesAsync();
-        return submission;
+        await channel.Writer.WriteAsync(new EditVideoMessage
+        {
+            SubmissionId = submission.Id,
+            Input = submission.Video,
+        });
+        return Ok(submission);
     }
 
     [HttpPut]
@@ -46,7 +65,7 @@ public class SubmissionsController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var submission = _ctx.Submissions.FirstOrDefault(x => x.Id.Equals(id));
-        if (submission is null)
+        if (submission == null)
         {
             return NotFound();
         }
